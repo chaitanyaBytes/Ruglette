@@ -13,6 +13,8 @@ pub struct RoundState {
     pub winning_number: Option<u8>,
     /// Total amount wagered in this round
     pub total_wagered: u64,
+    /// Payout amount if won
+    pub payout_amount: Option<u64>,
     /// status of the round
     pub status: GameStatus,
     /// Switchboard VRF account

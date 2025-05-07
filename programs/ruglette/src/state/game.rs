@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
 
 #[account]
+#[derive(InitSpace)]
 pub struct GameState {
     /// The authority who can update game settings
     pub authority: Pubkey,

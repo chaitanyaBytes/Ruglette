@@ -1,6 +1,7 @@
 pub use anchor_lang::prelude::*;
 
 #[account]
+#[derive(InitSpace)]
 pub struct PlayerState {
     /// Player's wallet
     pub owner: Pubkey,
