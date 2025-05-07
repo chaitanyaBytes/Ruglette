@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use crate::state::GameState;
 
 #[derive(Accounts)]
-pub struct Initialize<'info> {
+pub struct InitializeGame<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
 
@@ -25,14 +25,14 @@ pub struct Initialize<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> Initialize<'info> {
+impl<'info> InitializeGame<'info> {
     pub fn initialize_game(
         &mut self,
         min_bet: u64,
         max_bet: u64,
         house_fee_basis_points: u16,
         is_paused: bool,
-        bumps: &InitializeBumps,
+        bumps: &InitializeGameBumps,
     ) -> Result<()> {
         self.game.set_inner(GameState {
             authority: self.authority.key(),
