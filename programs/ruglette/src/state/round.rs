@@ -5,6 +5,8 @@ use crate::GameStatus;
 #[account]
 #[derive(InitSpace)]
 pub struct RoundState {
+    /// The seed for the differentiator
+    pub seed: u64,
     /// The player who placed the bet
     pub player: Pubkey,
     /// Timestamp when round started

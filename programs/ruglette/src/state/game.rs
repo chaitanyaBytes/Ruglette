@@ -11,10 +11,10 @@ pub struct GameState {
     pub max_bet: u64,
     /// House fee percentage (e.g., 270 for 2.7%)
     pub house_fee_basis_points: u16,
-    /// Total volume of bets placed
-    pub total_volume: u64,
-    /// Total fees collected
-    pub total_fees: u64,
+    // /// Total volume of bets placed
+    // pub total_volume: u64,
+    // /// Total fees collected
+    // pub total_fees: u64,
     /// Whether the game is paused
     pub is_paused: bool,
     /// Bump for PDA derivation
