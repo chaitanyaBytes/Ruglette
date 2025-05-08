@@ -15,7 +15,7 @@ pub struct VerifyRandomness<'info> {
         seeds = [b"round", player.key().as_ref(), round.start_time.to_le_bytes().as_ref()],
         bump = round.bump,
         constraint = round.player == player.key() @ ErrorCodes::InvalidPlayer,
-        constraint = round.status == GameStatus::AcceptingBets @ ErrorCodes::RoundNotAcceptingBets  
+        constraint = round.status == GameStatus::WaitingForVRF @ ErrorCodes::NotWaitingForRandomNumber  
     )]
     pub round: Account<'info, RoundState>,
 

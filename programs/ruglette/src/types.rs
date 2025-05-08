@@ -13,6 +13,7 @@ pub enum GameStatus {
     WaitingForVRF,
     ResultReady,
     BetsSettled,
+    PayoutsProcessed,
     Error,
 }
 

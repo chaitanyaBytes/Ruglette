@@ -10,6 +10,10 @@ pub enum ErrorCodes {
     InvalidPlayer,
     #[msg("Invalid Round state")]
     RoundNotAcceptingBets,
+    #[msg("Not Waiting For Random Number")]
+    NotWaitingForRandomNumber,
+    #[msg("The Result is Not Ready Yet")]
+    ResultNotReady,
     #[msg("Bet amount too small")]
     BetTooSmall,
     #[msg("Bet amount too large")]

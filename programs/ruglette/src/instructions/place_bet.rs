@@ -26,7 +26,7 @@ pub struct PlaceBet<'info> {
         seeds = [b"bet", payer.key().as_ref(), round.key().as_ref()],
         bump
     )]
-    pub bet: Account<'info, BetState>,
+    pub bets: Account<'info, BetState>,
 
     #[account(
         seeds = [b"game", authority.key().as_ref()],
@@ -38,7 +38,7 @@ pub struct PlaceBet<'info> {
     #[account(
         mut,
         seeds = [b"house_vault", game.key().as_ref()],
-        bump
+        bump = game.house_vault_bump
     )]
     pub house_vault: SystemAccount<'info>,
 
@@ -59,11 +59,11 @@ impl<'info> PlaceBet<'info> {
         }
 
         let clock = Clock::get()?;
-        self.bet.set_inner(BetState { 
+        self.bets.set_inner(BetState { 
             round: self.round.key(), 
             bets, 
             timestamp: clock.unix_timestamp, 
-            bump: bumps.bet 
+            bump: bumps.bets 
         });
         
         // update the round state

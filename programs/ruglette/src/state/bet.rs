@@ -5,6 +5,8 @@ use crate::BetType;
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, InitSpace)]
 pub struct Bet {
     pub bet_type: BetType,
+    #[max_len(6)]
+    pub targets: Vec<u8>, // Direct Numbers being bet on
     pub amount: u64,
 }
 
