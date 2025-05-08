@@ -22,6 +22,6 @@ pub mod ruglette {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+        initialize_game::handler(ctx)
     }
 }
