@@ -15,13 +15,16 @@ pub struct SettleBets<'info> {
         seeds = [b"round", player.key().as_ref(), round.start_time.to_le_bytes().as_ref()],
         bump = round.bump,
         constraint = round.player == player.key() @ ErrorCodes::InvalidPlayer,
-        constraint = round.status == GameStatus::ResultReady @ ErrorCodes::ResultNotReady  
+        constraint = round.status == GameStatus::ResultReady @ ErrorCodes::ResultNotReady,
+        close = player
     )]
     pub round: Account<'info, RoundState>,
 
     #[account(
+        mut,
         seeds = [b"bet", payer.key().as_ref(), round.key().as_ref()],
-        bump = bets.bump
+        bump = bets.bump,
+        close = player
     )]
     pub bets: Account<'info, BetState>,
 
@@ -42,8 +45,11 @@ pub struct SettleBets<'info> {
 }
 
 impl<'info> SettleBets<'info> {
-    pub fn settle_bets(&mut self) -> Result<()>{
-        require!(self.round.status == GameStatus::ResultReady, ErrorCodes::ResultNotReady);
+    pub fn settle_bets(&mut self) -> Result<()> {
+        require!(
+            self.round.status == GameStatus::ResultReady,
+            ErrorCodes::ResultNotReady
+        );
 
         let random_number = match self.round.winning_number {
             Some(number) => number,
@@ -63,15 +69,15 @@ impl<'info> SettleBets<'info> {
             let signer_seeds: &[&[&[u8]]] = &[&[
                 b"house_vault",
                 &self.game.key().as_ref()[..],
-                &[self.game.house_vault_bump]
+                &[self.game.house_vault_bump],
             ]];
 
             transfer(
-                self.system_program.to_account_info(), 
-                self.house_vault.to_account_info(), 
+                self.system_program.to_account_info(),
+                self.house_vault.to_account_info(),
                 self.player.to_account_info(),
-                payout_amount, 
-                Some(signer_seeds)
+                payout_amount,
+                Some(signer_seeds),
             )?;
         }
 
@@ -90,11 +96,11 @@ impl<'info> SettleBets<'info> {
             BetType::Red => {
                 let color = BetType::get_color(random_number);
                 color == Color::Red
-            },
+            }
             BetType::Black => {
                 let color = BetType::get_color(random_number);
                 color == Color::Black
-            },
+            }
             BetType::Straight => {
                 // Single number bet
                 if bet.targets.len() == 1 {
@@ -102,7 +108,7 @@ impl<'info> SettleBets<'info> {
                 } else {
                     false // Invalid number of targets
                 }
-            },
+            }
             BetType::Split => {
                 // Two adjacent numbers
                 if bet.targets.len() == 2 {
@@ -110,7 +116,7 @@ impl<'info> SettleBets<'info> {
                 } else {
                     false // Invalid number of targets
                 }
-            },
+            }
             BetType::Street => {
                 // Three numbers in a horizontal line
                 if bet.targets.len() == 3 {
@@ -118,7 +124,7 @@ impl<'info> SettleBets<'info> {
                 } else {
                     false // Invalid number of targets
                 }
-            },
+            }
             BetType::Corner => {
                 // Four numbers in a square
                 if bet.targets.len() == 4 {
@@ -126,7 +132,7 @@ impl<'info> SettleBets<'info> {
                 } else {
                     false // Invalid number of targets
                 }
-            },
+            }
             BetType::Sixline => {
                 // Six numbers (two adjacent streets)
                 if bet.targets.len() == 6 {
@@ -134,7 +140,7 @@ impl<'info> SettleBets<'info> {
                 } else {
                     false // Invalid number of targets
                 }
-            },
+            }
             BetType::Dozen => {
                 // Check which dozen was bet on and if the winning number is in that dozen
                 // First dozen: 1-12, Second dozen: 13-24, Third dozen: 25-36
@@ -148,7 +154,7 @@ impl<'info> SettleBets<'info> {
                 } else {
                     false // Invalid number of targets
                 }
-            },
+            }
             BetType::Column => {
                 // Check which column was bet on and if the winning number is in that column
                 // First column: 1,4,7,10,13,16,19,22,25,28,31,34
@@ -164,9 +170,9 @@ impl<'info> SettleBets<'info> {
                 } else {
                     false // Invalid number of targets
                 }
-            },
+            }
         };
-    
+
         if won {
             // Calculate payout: (bet amount * multiplier)
             bet.amount * bet.bet_type.multiplier() as u64

@@ -18,6 +18,9 @@ pub enum ErrorCodes {
     BetTooSmall,
     #[msg("Bet amount too large")]
     BetTooLarge,
+    #[msg("Round not settled yet")]
+    RoundNotSettled,
+
     NotEnoughFundsToPlay,
     RandomnessAlreadyRevealed,
     InvalidRandomnessAccount,

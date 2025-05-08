@@ -15,3 +15,6 @@ pub use verify_randomness::*;
 
 pub mod settle_bets;
 pub use settle_bets::*;
+
+pub mod close_round;
+pub use close_round::*;
