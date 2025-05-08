@@ -6,3 +6,6 @@ pub use initialize_round::*;
 
 pub mod place_bet;
 pub use place_bet::*;
+
+pub mod wheel_spin;
+pub use wheel_spin::*;

@@ -2,7 +2,7 @@
 pub use anchor_lang::prelude::*;
 
 use crate::error::ErrorCodes;
-use crate::{Bet, BetState, GameState, GameStatus, RoundState};
+use crate::{transfer, Bet, BetState, GameState, GameStatus, RoundState};
 
 #[derive(Accounts)]
 pub struct PlaceBet<'info> {
@@ -35,6 +35,13 @@ pub struct PlaceBet<'info> {
     )]
     pub game: Account<'info, GameState>,
 
+    #[account(
+        mut,
+        seeds = [b"house_vault", game.key().as_ref()],
+        bump
+    )]
+    pub house_vault: SystemAccount<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
@@ -61,6 +68,13 @@ impl<'info> PlaceBet<'info> {
         
         // update the round state
         self.round.total_wagered += total_bet_amount;
-        todo!()
+        
+        transfer(
+            self.system_program.to_account_info(), 
+            self.player.to_account_info(), 
+            self.house_vault.to_account_info(), 
+            self.round.total_wagered, 
+            None
+        )
     }
 }
