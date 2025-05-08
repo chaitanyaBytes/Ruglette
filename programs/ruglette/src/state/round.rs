@@ -23,4 +23,6 @@ pub struct RoundState {
     pub result_buffer: [u8; 32],
     /// Bump for PDA derivation
     pub bump: u8,
+    /// The slot at which the randomness was committed
+    pub commit_slot: u64,
 }

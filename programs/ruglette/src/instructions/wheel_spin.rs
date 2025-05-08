@@ -38,6 +38,10 @@ impl<'info> WheelSpin<'info> {
             return Err(ErrorCodes::RandomnessAlreadyRevealed.into());
         };
 
+        // Track the player's commited values so you know they don't request randomness
+        // multiple times.
+        self.round.commit_slot = randomness_data.seed_slot;
+
         // Store flip commit
         self.round.vrf_account = randomness_account;
         self.round.status = GameStatus::WaitingForVRF;

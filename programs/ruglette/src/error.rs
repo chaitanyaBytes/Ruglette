@@ -16,4 +16,7 @@ pub enum ErrorCodes {
     BetTooLarge,
     NotEnoughFundsToPlay,
     RandomnessAlreadyRevealed,
+    InvalidRandomnessAccount,
+    RandomnessExpired,
+    RandomnessNotResolved,
 }

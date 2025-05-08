@@ -47,6 +47,7 @@ impl<'info> InitializeRound<'info> {
             vrf_account: Pubkey::default(),
             result_buffer: [0; 32],
             bump: bumps.round,
+            commit_slot: 0
         });
         Ok(())
     }
