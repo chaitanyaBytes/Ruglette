@@ -15,4 +15,5 @@ pub enum ErrorCodes {
     #[msg("Bet amount too large")]
     BetTooLarge,
     NotEnoughFundsToPlay,
+    RandomnessAlreadyRevealed,
 }
