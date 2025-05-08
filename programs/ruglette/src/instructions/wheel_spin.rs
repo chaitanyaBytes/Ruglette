@@ -1,14 +1,13 @@
 pub use anchor_lang::prelude::*;
 use switchboard_on_demand::accounts::RandomnessAccountData;
 
-use crate::{transfer, Bet, BetState, GameState, GameStatus, RoundState};
+use crate::{GameStatus, RoundState};
 use crate::error::ErrorCodes;
 
 #[derive(Accounts)]
 pub struct WheelSpin<'info> {
     #[account(mut)]
     pub player: Signer<'info>,
-    pub authority: SystemAccount<'info>,
 
     #[account(
         mut,
@@ -18,29 +17,6 @@ pub struct WheelSpin<'info> {
         constraint = round.status == GameStatus::AcceptingBets @ ErrorCodes::RoundNotAcceptingBets  
     )]
     pub round: Account<'info, RoundState>,
-
-    #[account(
-        init, 
-        payer = player,
-        space = 8 + BetState::INIT_SPACE,
-        seeds = [b"bet", payer.key().as_ref(), round.key().as_ref()],
-        bump
-    )]
-    pub bet: Account<'info, BetState>,
-
-    #[account(
-        seeds = [b"game", authority.key().as_ref()],
-        bump = game.bump,
-        constraint = !game.is_paused @ ErrorCodes::GamePaused
-    )]
-    pub game: Account<'info, GameState>,
-
-    #[account(
-        mut,
-        seeds = [b"house_vault", game.key().as_ref()],
-        bump
-    )]
-    pub house_vault: SystemAccount<'info>,
 
     /// CHECK: The account's data is validated manually within the handler.
     pub randomness_account_data: AccountInfo<'info>,
