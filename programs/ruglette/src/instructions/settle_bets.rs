@@ -2,7 +2,7 @@
 use anchor_lang::prelude::*;
 
 use crate::error::ErrorCodes;
-use crate::{transfer, Bet, BetState, GameState, GameStatus, RoundState};
+use crate::{transfer, Bet, BetState, BetType, Color, GameState, GameStatus, RoundState};
 
 #[derive(Accounts)]
 pub struct SettleBets<'info> {
@@ -22,7 +22,7 @@ pub struct SettleBets<'info> {
 
     #[account(
         mut,
-        seeds = [b"bet", payer.key().as_ref(), round.key().as_ref()],
+        seeds = [b"bet", player.key().as_ref(), round.key().as_ref()],
         bump = bets.bump,
         close = player
     )]
@@ -56,19 +56,20 @@ impl<'info> SettleBets<'info> {
             None => return Err(ErrorCodes::ResultNotReady.into()),
         };
 
-        let payout_amount = 0;
+        let mut payout_amount = 0;
 
         for bet in &self.bets.bets {
-            payout_amount += calculate_payout(bet, random_number);
+            payout_amount += self.calculate_payout(&bet, random_number);
         }
 
         self.round.payout_amount = Some(payout_amount);
 
         // handle payouts
+        // todo: fix the seeds here
         if payout_amount > 0 {
             let signer_seeds: &[&[&[u8]]] = &[&[
                 b"house_vault",
-                &self.game.key().as_ref()[..],
+                self.authority.key.as_ref(),
                 &[self.game.house_vault_bump],
             ]];
 
@@ -87,7 +88,7 @@ impl<'info> SettleBets<'info> {
         Ok(())
     }
 
-    pub fn calculate_payout(bet: &Bet, random_number: u8) -> u64 {
+    pub fn calculate_payout(&mut self, bet: &Bet, random_number: u8) -> u64 {
         let won = match bet.bet_type {
             BetType::Odd => random_number > 0 && random_number % 2 == 1,
             BetType::Even => random_number > 0 && random_number % 2 == 0,

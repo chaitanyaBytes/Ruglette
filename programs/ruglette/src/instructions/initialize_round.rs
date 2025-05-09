@@ -33,9 +33,6 @@ impl<'info> InitializeRound<'info> {
     pub fn initialize_round(&mut self, start_time: i64, bumps: &InitializeRoundBumps) -> Result<()> {
         // Check if game is paused
     require!(!self.game.is_paused, ErrorCodes::GamePaused);
-    
-    // Optional validation
-    require!(seed > 0, ErrorCodes::InvalidSeed);
 
         self.round.set_inner(RoundState {
             player: self.player.key(),

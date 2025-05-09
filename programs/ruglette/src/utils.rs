@@ -1,4 +1,7 @@
-use crate::types::{BetType, Color};
+use crate::{
+    error::ErrorCodes,
+    types::{BetType, Color},
+};
 pub use anchor_lang::prelude::*;
 
 impl BetType {

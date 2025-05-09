@@ -23,7 +23,7 @@ pub struct PlaceBet<'info> {
         init, 
         payer = player,
         space = 8 + BetState::INIT_SPACE,
-        seeds = [b"bet", payer.key().as_ref(), round.key().as_ref()],
+        seeds = [b"bet", player.key().as_ref(), round.key().as_ref()],
         bump
     )]
     pub bets: Account<'info, BetState>,
