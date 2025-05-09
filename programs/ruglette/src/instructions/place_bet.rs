@@ -37,7 +37,7 @@ pub struct PlaceBet<'info> {
 
     #[account(
         mut,
-        seeds = [b"house_vault", game.key().as_ref()],
+        seeds = [b"house_vault", game.to_account_info().key().as_ref()],
         bump = game.house_vault_bump
     )]
     pub house_vault: SystemAccount<'info>,

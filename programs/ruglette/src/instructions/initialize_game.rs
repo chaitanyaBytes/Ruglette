@@ -18,7 +18,7 @@ pub struct InitializeGame<'info> {
 
     #[account(
         mut,
-        seeds = [b"house_vault", game.key().as_ref()],
+        seeds = [b"house_vault", game.to_account_info().key().as_ref()],
         bump
     )]
     pub house_vault: SystemAccount<'info>,
