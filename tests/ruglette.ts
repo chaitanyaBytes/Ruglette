@@ -35,14 +35,14 @@ describe("ruglette", () => {
     return signature;
   }
 
-  const [authority, player, randomness_account_data] = Array.from({ length: 3 }, () => Keypair.generate());
+  const [authority, player, randomnessAccountData] = Array.from({ length: 3 }, () => Keypair.generate());
 
   const game = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("game"), authority.publicKey.toBuffer()],
     programId
   )[0];
 
-  const house_vault = anchor.web3.PublicKey.findProgramAddressSync(
+  const houseVault = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("house_vault"), game.toBuffer()],
     programId
   )[0];
@@ -82,7 +82,7 @@ describe("ruglette", () => {
 
       SystemProgram.transfer({
         fromPubkey: provider.publicKey,
-        toPubkey: house_vault,
+        toPubkey: houseVault,
         lamports: 100 * LAMPORTS_PER_SOL
       }),
     ]
@@ -91,7 +91,7 @@ describe("ruglette", () => {
 
     console.log("authority balance: ", await connection.getBalance(authority.publicKey))
     console.log("player balance: ", await connection.getBalance(player.publicKey))
-    console.log("house_vault balance: ", await connection.getBalance(house_vault))
+    console.log("house_vault balance: ", await connection.getBalance(houseVault))
   });
 
   it("Initialize game", async () => {
@@ -103,10 +103,59 @@ describe("ruglette", () => {
     ).accountsPartial({
       authority: authority.publicKey,
       game,
-      houseVault: house_vault,
+      houseVault,
       systemProgram: anchor.web3.SystemProgram.programId
     })
       .signers([authority])
+      .rpc()
+      .then(confirm)
+      .then(log);
+  })
+
+  it("Initialize round", async () => {
+    await program.methods.initializeRound(
+      new anchor.BN(startTime),
+    ).accountsPartial({
+      player: player.publicKey,
+      authority: authority.publicKey,
+      round,
+      game,
+      systemProgram: anchor.web3.SystemProgram.programId
+    })
+      .signers([player])
+      .rpc()
+      .then(confirm)
+      .then(log);
+  })
+
+  it("Place bets", async () => {
+    await program.methods.placeBet(
+      [
+        {
+          betType: {
+            straight: {},
+          },
+          targets: Buffer.from([1]),
+          amount: new anchor.BN(1 * LAMPORTS_PER_SOL),
+        },
+        {
+          betType: {
+            black: {},
+          },
+          targets: Buffer.from([]),
+          amount: new anchor.BN(1 * LAMPORTS_PER_SOL),
+        }
+      ]
+    ).accountsPartial({
+      player: player.publicKey,
+      authority: authority.publicKey,
+      round,
+      game,
+      bets,
+      houseVault,
+      systemProgram: anchor.web3.SystemProgram.programId
+    })
+      .signers([player])
       .rpc()
       .then(confirm)
       .then(log);
