@@ -7,8 +7,6 @@ pub mod state;
 pub mod types;
 pub mod utils;
 
-use anchor_lang::prelude::*;
-
 pub use constants::*;
 pub use instructions::*;
 pub use state::*;

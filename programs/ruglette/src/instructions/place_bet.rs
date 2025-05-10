@@ -26,7 +26,7 @@ pub struct PlaceBet<'info> {
         seeds = [b"bet", player.key().as_ref(), round.key().as_ref()],
         bump
     )]
-    pub bets: Account<'info, BetState>,
+    pub bets: Box<Account<'info, BetState>>,
 
     #[account(
         seeds = [b"game", authority.key().as_ref()],

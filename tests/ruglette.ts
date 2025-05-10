@@ -1,16 +1,97 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { Ruglette } from "../target/types/ruglette";
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 
 describe("ruglette", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.getProvider()
+
+  const connection = provider.connection;
 
   const program = anchor.workspace.ruglette as Program<Ruglette>;
+  const programId = program.programId;
 
-  it("Is initialized!", async () => {
-    // Add your test here.
-    const tx = await program.methods.initialize().rpc();
-    console.log("Your transaction signature", tx);
+  const confirm = async (signature: string): Promise<string> => {
+    const block = await connection.getLatestBlockhash();
+    await connection.confirmTransaction({
+      signature,
+      ...block
+    });
+    return signature
+  }
+
+  const log = async (signature: string): Promise<string> => {
+    console.log(
+      `Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`
+    );
+    return signature;
+  }
+
+  const [authority, player, randomness_account_data] = Array.from({ length: 3 }, () => Keypair.generate());
+
+  const game = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("game"), authority.publicKey.toBuffer()],
+    programId
+  )[0];
+
+  const house_vault = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("house_vault"), game.toBuffer()],
+    programId
+  )[0];
+
+  // For a round, you need player's pubkey and start time
+  const startTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  const round = anchor.web3.PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("round"),
+      player.publicKey.toBuffer(),
+      new anchor.BN(startTime).toArrayLike(Buffer, "le", 8)
+    ],
+    programId
+  )[0];
+
+  const bets = anchor.web3.PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("bet"),
+      player.publicKey.toBuffer(),
+      round.toBuffer()
+    ],
+    programId
+  )[0];
+
+  it("Airdrop", async () => {
+    let tx = new anchor.web3.Transaction();
+
+    // airdrop a few sol to authority and player
+    tx.instructions = [
+      ...[authority, player].map((a) =>
+        SystemProgram.transfer({
+          fromPubkey: provider.publicKey,
+          toPubkey: a.publicKey,
+          lamports: 100 * LAMPORTS_PER_SOL
+        })
+      ),
+
+      SystemProgram.transfer({
+        fromPubkey: provider.publicKey,
+        toPubkey: house_vault,
+        lamports: 100 * LAMPORTS_PER_SOL
+      }),
+    ]
+
+    await provider.sendAndConfirm(tx).then(log);
+
+    console.log("authority balance: ", await connection.getBalance(authority.publicKey))
+    console.log("player balance: ", await connection.getBalance(player.publicKey))
+    console.log("house_vault balance: ", await connection.getBalance(house_vault))
   });
+
 });

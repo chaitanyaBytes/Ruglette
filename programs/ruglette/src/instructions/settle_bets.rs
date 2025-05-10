@@ -26,7 +26,7 @@ pub struct SettleBets<'info> {
         bump = bets.bump,
         close = player
     )]
-    pub bets: Account<'info, BetState>,
+    pub bets: Box<Account<'info, BetState>>,
 
     #[account(
         seeds = [b"game", authority.key().as_ref()],
@@ -59,7 +59,7 @@ impl<'info> SettleBets<'info> {
         let mut payout_amount = 0;
 
         for bet in &self.bets.bets {
-            payout_amount += calculate_payout(&bet, random_number);
+            payout_amount += calculate_payout(&bet, random_number)?;
         }
 
         self.round.payout_amount = Some(payout_amount);
@@ -72,7 +72,14 @@ impl<'info> SettleBets<'info> {
                 &[self.game.house_vault_bump],
             ]];
 
-            let house_fee = payout_amount * (self.game.house_fee_basis_points as u64) / 10_000;
+            let house_fee = payout_amount
+                .checked_mul(
+                    u64::try_from(self.game.house_fee_basis_points)
+                        .map_err(|_| ProgramError::ArithmeticOverflow)?,
+                )
+                .ok_or(ProgramError::ArithmeticOverflow)?
+                .checked_div(10_000)
+                .ok_or(ProgramError::ArithmeticOverflow)?;
 
             transfer(
                 self.system_program.to_account_info(),
@@ -90,7 +97,7 @@ impl<'info> SettleBets<'info> {
     }
 }
 
-pub fn calculate_payout(bet: &Bet, random_number: u8) -> u64 {
+pub fn calculate_payout(bet: &Bet, random_number: u8) -> Result<u64> {
     let won = match bet.bet_type {
         BetType::Odd => random_number > 0 && random_number % 2 == 1,
         BetType::Even => random_number > 0 && random_number % 2 == 0,
@@ -178,8 +185,14 @@ pub fn calculate_payout(bet: &Bet, random_number: u8) -> u64 {
 
     if won {
         // Calculate payout: (bet amount * multiplier)
-        bet.amount * bet.bet_type.multiplier() as u64
+        let multiplier = u64::try_from(bet.bet_type.multiplier())
+            .map_err(|_| ProgramError::ArithmeticOverflow)?;
+
+        Ok(bet
+            .amount
+            .checked_mul(multiplier)
+            .ok_or(ProgramError::ArithmeticOverflow)?)
     } else {
-        0
+        Ok(0)
     }
 }
