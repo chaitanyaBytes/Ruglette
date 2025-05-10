@@ -94,4 +94,21 @@ describe("ruglette", () => {
     console.log("house_vault balance: ", await connection.getBalance(house_vault))
   });
 
+  it("Initialize game", async () => {
+    await program.methods.initializeGame(
+      new anchor.BN(0.01 * LAMPORTS_PER_SOL),
+      new anchor.BN(100 * LAMPORTS_PER_SOL),
+      270,
+      false
+    ).accountsPartial({
+      authority: authority.publicKey,
+      game,
+      houseVault: house_vault,
+      systemProgram: anchor.web3.SystemProgram.programId
+    })
+      .signers([authority])
+      .rpc()
+      .then(confirm)
+      .then(log);
+  })
 });
