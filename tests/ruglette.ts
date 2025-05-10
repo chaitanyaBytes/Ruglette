@@ -8,13 +8,48 @@ import {
   SystemProgram,
   Transaction,
 } from "@solana/web3.js";
+import {
+  AnchorUtils,
+  InstructionUtils,
+  Queue,
+  Randomness,
+  asV0Tx,
+  ON_DEMAND_DEVNET_PID,
+} from "@switchboard-xyz/on-demand";
+
+let randomnessAccount: PublicKey;
+let randomness: Randomness;
+let sbQueue: PublicKey;
+let sbProgram: Program;
 
 describe("ruglette", () => {
+  before(async () => {
+    const { keypair, connection, program: sbProgramInstance } = await AnchorUtils.loadEnv();
+    console.log("keypair", keypair.publicKey.toString());
+    console.log("connection", connection.rpcEndpoint); // this is the devnet cluster
+
+    const sbQueueInstance = new PublicKey("FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di");
+    const queueAccount = new Queue(sbProgramInstance, sbQueueInstance);
+    console.log("Program", sbProgramInstance!.programId.toString());
+    console.log("Queue account", queueAccount.pubkey.toString());
+
+    // create randomness account and initialise it
+    const rngKp = Keypair.generate();
+    const [randomnessInstance, ix] = await Randomness.create(sbProgramInstance, rngKp, sbQueueInstance);
+    console.log("\nCreated randomness account..");
+    console.log("Randomness account", randomnessInstance.pubkey.toString());
+    randomnessAccount = randomnessInstance.pubkey;
+    randomness = randomnessInstance;
+    sbQueue = sbQueueInstance;
+    sbProgram = sbProgramInstance;
+  });
+
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
   const provider = anchor.getProvider()
 
   const connection = provider.connection;
+  console.log("connection", connection.rpcEndpoint); // this is the local cluster
 
   const program = anchor.workspace.ruglette as Program<Ruglette>;
   const programId = program.programId;
@@ -160,4 +195,25 @@ describe("ruglette", () => {
       .then(confirm)
       .then(log);
   })
+
+  it("Spin the wheel", async () => {
+    // In your spin the wheel test
+    const commitIx = await randomness.commitIx(sbQueue);
+    const commitTx = new Transaction().add(commitIx);
+    await provider.sendAndConfirm(commitTx);
+
+    await program.methods.wheelSpin(
+      randomnessAccount
+    ).accountsPartial({
+      player: player.publicKey,
+      round,
+      randomnessAccountData: randomnessAccountData.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId
+    })
+      .signers([player])
+      .rpc()
+      .then(confirm)
+      .then(log);
+  })
+
 });
