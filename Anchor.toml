@@ -6,13 +6,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-ruglette = "GDHvCgbLXGheTMSDh7byyEPRLWhGJPSXxeCHKkd3JuSn"
+ruglette = "Fwr1ZKSGJBkYEwVged6orgi6TjZscqTcYrJ1NWSgy15Q"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
@@ -22,4 +22,7 @@ test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 # url = "https://api.mainnet-beta.solana.com"
 
 # [[test.validator.clone]]
-# address = "JAMFaXfnb7fMmX7YacoSWRBya7pA18fZgefv9EbjAxJY"
+# address = "FfD96yeXs4cxZshoPPSKhSPgVQxLAJUT3gefgh84m1Di"
+
+# [[test.validator.clone]]
+# address = "SBondMDrcV3K4kxZR1HNVT7osZxAHVHgYXL5Ze1oMUv"

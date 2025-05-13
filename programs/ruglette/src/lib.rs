@@ -13,7 +13,7 @@ pub use state::*;
 pub use types::*;
 pub use utils::*;
 
-declare_id!("GDHvCgbLXGheTMSDh7byyEPRLWhGJPSXxeCHKkd3JuSn");
+declare_id!("Fwr1ZKSGJBkYEwVged6orgi6TjZscqTcYrJ1NWSgy15Q");
 
 #[program]
 pub mod ruglette {

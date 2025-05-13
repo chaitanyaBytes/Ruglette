@@ -55,6 +55,8 @@ impl<'info> VerifyRandomness<'info> {
         self.round.result_buffer = revealed_random_value;
         self.round.winning_number = Some(randomness_result);
         self.round.status = GameStatus::ResultReady;
+
+        msg!("round state {:?}", self.round);
         
         Ok(())
     }

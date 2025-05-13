@@ -7,7 +7,7 @@ pub enum Color {
     Green,
 }
 
-#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace, Debug)]
 pub enum GameStatus {
     AcceptingBets,
     WaitingForVRF,

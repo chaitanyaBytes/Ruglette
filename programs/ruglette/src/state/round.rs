@@ -3,7 +3,7 @@ pub use anchor_lang::prelude::*;
 use crate::GameStatus;
 
 #[account]
-#[derive(InitSpace)]
+#[derive(InitSpace, Debug)]
 pub struct RoundState {
     /// The player who placed the bet
     pub player: Pubkey,
