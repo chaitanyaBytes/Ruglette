@@ -36,15 +36,13 @@ describe("ruglette", () => {
 
   before(async () => {
     const { keypair, connection, program: sbProgramInstance } = await AnchorUtils.loadEnv();
-    console.log("keypair", keypair.publicKey.toString());
-    console.log("connection", connection.rpcEndpoint); // this is the devnet cluster
+    // console.log("keypair", keypair.publicKey.toString());
+    // console.log("connection", connection.rpcEndpoint); // this is the devnet cluster
 
     const sbQueueInstance = new PublicKey("EYiAmGSdsQTuCw413V5BzaruWuCCSDgTPtBGvLkXHbe7");
-    const [state] = PublicKey.findProgramAddressSync([Buffer.from('STATE')], sbProgramInstance.programId);
-    console.log("state: ", state)
     const queueAccount = new Queue(sbProgramInstance, sbQueueInstance);
-    console.log("Program", sbProgramInstance!.programId.toString());
-    console.log("Queue account", queueAccount.pubkey.toString());
+    // console.log("Program", sbProgramInstance!.programId.toString());
+    // console.log("Queue account", queueAccount.pubkey.toString());
 
     // create randomness account and initialise it
     const rngKp = Keypair.generate();
@@ -130,9 +128,9 @@ describe("ruglette", () => {
 
     await provider.sendAndConfirm(tx).then(log);
 
-    console.log("authority balance: ", await connection.getBalance(authority.publicKey))
-    console.log("player balance: ", await connection.getBalance(player.publicKey))
-    console.log("house_vault balance: ", await connection.getBalance(houseVault))
+    // console.log("authority balance: ", await connection.getBalance(authority.publicKey))
+    // console.log("player balance: ", await connection.getBalance(player.publicKey))
+    // console.log("house_vault balance: ", await connection.getBalance(houseVault))
   });
 
   it("Initialize game", async () => {
@@ -221,19 +219,15 @@ describe("ruglette", () => {
     // const sim = await connection.simulateTransaction(createRandomnessTx);
     const sig1 = await connection.sendTransaction(createRandomnessTx, { skipPreflight: true });
     await connection.confirmTransaction(sig1)
-    console.log(
-      "  Transaction Signature for randomness account creation: ",
-      sig1
-    );
   })
 
   it("Spin the wheel", async () => {
     // In your spin the wheel test
-    console.log("randomnessAccount", randomnessAccount.toString())
-    console.log("randomnessAccountData", randomnessAccountData.publicKey.toString())
-    console.log("sbQueue", sbQueue.toString())
-    console.log("sbProgram", sbProgram.programId.toString())
-    console.log("randomness", randomness.pubkey.toString())
+    // console.log("randomnessAccount", randomnessAccount.toString())
+    // console.log("randomnessAccountData", randomnessAccountData.publicKey.toString())
+    // console.log("sbQueue", sbQueue.toString())
+    // console.log("sbProgram", sbProgram.programId.toString())
+    // console.log("randomness", randomness.pubkey.toString())
 
     try {
       const commitIx = await randomness.commitIx(sbQueue);
@@ -249,6 +243,8 @@ describe("ruglette", () => {
         .preInstructions([commitIx])
         .signers([player])
         .rpc()
+        .then(confirm)
+        .then(log)
     } catch (e) {
       console.error(`Oops, something went wrong: ${e}`)
     }
